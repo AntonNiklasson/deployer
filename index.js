@@ -28,7 +28,7 @@ app.get('/deploy/:service', (req, res) => {
 		exec(`git clone ${service.repo} ${releasePath}`)
 
 		// Step into the new release.
-		process.chdir(releasePath)
+		process.chdir(`${releasePath}`)
 
 		// Execute each of the service's deploy commands.
 		service.commands.forEach(cmd => {
