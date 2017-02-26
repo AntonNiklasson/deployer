@@ -3,6 +3,7 @@
 const express = require('express')
 const process = require('process')
 const fs = require('fs')
+const path = require('path')
 const exec = require('child_process').exec
 const bodyParser = require('body-parser')
 const services = require('./services')
@@ -22,17 +23,21 @@ app.get('/deploy/:service', (req, res) => {
 		const releasePath = (new Date()).getTime()
 
 		// Go to the service root folder.
+		console.log(`cd ${service.path}`)
 		process.chdir(service.path)
 
 		// Clone the new release.
+		console.log(`git clone ${service.repo} ${releasePath}`)
 		exec(`git clone ${service.repo} ${releasePath}`)
 
 		// Step into the new release.
-		process.chdir(`${releasePath}`)
+		console.log(`cd ${path.join(service.path, releasePath.toString())}`)
+		process.chdir(path.join(service.path, releasePath.toString()))
 
 		// Execute each of the service's deploy commands.
 		service.commands.forEach(cmd => {
 			exec(cmd, (err) => {
+				console.log(`Running '${cmd}'`)
 				if(err) {
 					res.status(500).end()
 				}
@@ -40,9 +45,11 @@ app.get('/deploy/:service', (req, res) => {
 		})
 
 		// Step out of the release folder.
+		console.log(`cd ..`)
 		process.chdir('..')
 
 		// Activate the new release.
+		console.log(`ln -s ${releasePath} ${currentReleasePath}`)
 		exec(`ln -s ${releasePath} ${currentReleasePath}`)
 
 		res.end()
