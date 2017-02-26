@@ -1,3 +1,5 @@
+#! /usr/bin/env nodejs
+
 const express = require('express')
 const process = require('process')
 const fs = require('fs')
