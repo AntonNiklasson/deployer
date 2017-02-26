@@ -10,6 +10,10 @@ const services = require('./services')
 const app = express()
 app.use(bodyParser.json())
 
+app.get('/', (req, res) => {
+	res.send(Object.keys(services))
+})
+
 app.get('/deploy/:service', (req, res) => {
 	const service = services[req.params.service]
 
@@ -17,10 +21,7 @@ app.get('/deploy/:service', (req, res) => {
 		const currentReleasePath = 'current'
 		const releasePath = (new Date()).getTime()
 
-		// Move to the services root folder.
 		process.chdir(service.path)
-
-		// Clone a new instance of the repo.
 		exec(`git clone ${service.repo} ${releasePath}`)
 
 		// Execute each of the service's commands.
@@ -38,7 +39,6 @@ app.get('/deploy/:service', (req, res) => {
 
 		res.end()
 	} else {
-		console.log(service)
 		res.sendStatus(404)
 	}
 })
