@@ -4,7 +4,7 @@ const express = require('express')
 const process = require('process')
 const fs = require('fs')
 const path = require('path')
-const exec = require('child_process').exec
+const exec = require('child_process').execSync
 const bodyParser = require('body-parser')
 const services = require('./services')
 
