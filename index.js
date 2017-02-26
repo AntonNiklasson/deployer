@@ -11,20 +11,28 @@ app.use(bodyParser.json())
 app.get('/deploy/:service', (req, res) => {
 	const service = services[req.params.service]
 
-	console.log(service)
-
 	if(service && fs.existsSync(service.path)) {
+		const currentReleasePath = 'current'
+		const releasePath = (new Date()).getTime()
+
+		// Move to the services root folder.
 		process.chdir(service.path)
+
+		// Clone a new instance of the repo.
+		exec(`git clone ${service.repo} ${releasePath}`)
+
+		// Execute each of the service's commands.
 		service.commands.forEach(cmd => {
-			exec(cmd, (err, stdin, stdout) => {
+			exec(cmd, (err) => {
 				if(err) {
-					console.log(err)
+					console.log(err	)
 					res.status(500).end()
 				}
-
-				console.log(stdout)
 			})
 		})
+
+		// Symlink ./current to the new release.
+		exec(`ln -s ${releasePath} ${currentReleasePath}`)
 
 		res.end()
 	} else {
