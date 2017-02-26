@@ -21,20 +21,28 @@ app.get('/deploy/:service', (req, res) => {
 		const currentReleasePath = 'current'
 		const releasePath = (new Date()).getTime()
 
+		// Go to the service root folder.
 		process.chdir(service.path)
+
+		// Clone the new release.
 		exec(`git clone ${service.repo} ${releasePath}`)
 
-		// Execute each of the service's commands.
+		// Step into the new release.
+		process.chdir(releasePath)
+
+		// Execute each of the service's deploy commands.
 		service.commands.forEach(cmd => {
 			exec(cmd, (err) => {
 				if(err) {
-					console.log(err	)
 					res.status(500).end()
 				}
 			})
 		})
 
-		// Symlink ./current to the new release.
+		// Step out of the release folder.
+		process.chdir('..')
+
+		// Activate the new release.
 		exec(`ln -s ${releasePath} ${currentReleasePath}`)
 
 		res.end()
