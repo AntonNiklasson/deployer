@@ -43,4 +43,4 @@ app.get('/deploy/:service', (req, res) => {
 	}
 })
 
-app.listen(8888)
+app.listen(8888, 'localhost')
