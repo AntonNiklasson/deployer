@@ -8,6 +8,7 @@
     indent:
       - 2
       - tab
+    keyword-spacing: 2
     no-console: 0
     semi:
       - 2

@@ -7,7 +7,11 @@ const services = require('./services')
 const app = express()
 app.use(bodyParser.json())
 
-app.get('/', (req, res) => res.send(Object.keys(services)))
+app.get('/', (req, res) => {
+	res.send(Object.keys(services))
+	return true
+})
+
 app.post('/deploy/:service', require('./deploy'))
 
 app.listen(8888, 'localhost')

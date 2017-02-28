@@ -1,6 +1,10 @@
 const fs = require('fs')
 const path = require('path')
+const mkdirp = require('mkdirp')
 const services = require('./services')
+
+const __DEV__ = process.env.NODE_ENV === 'dev'
+console.log(__DEV__)
 
 const logger = console
 
@@ -17,13 +21,25 @@ const generateReleaseName = () => {
 const deploy = (req, res) => {
 	const serviceName = req.params.service
 	const service = services[serviceName]
+	const payload = req.body
 
-	if(!service) {
+	if (payload.branch !== service.branch) {
+		res.status(200).send(`Not deploying ${payload.branch}`)
+	} else if (!payload.repository || !payload.repository.ssh_url || payload.repository.ssh_url !== service.repo) {
+		res.status(403).send('Trying to deploy the wrong service')
+	}
+
+	if (__DEV__) {
+		service.path = `~/Desktop${service.path}`
+		console.log(service)
+	}
+
+	if (!service) {
 		res.status(404).send(`Service Does Not Exist`)
 	}
 
-	if(!fs.existsSync(service.path)) {
-		fs.mkdirSync(service.path)
+	if (!fs.existsSync(service.path)) {
+		mkdirp.sync(service.path)
 	}
 
 	const currentReleaseLink = path.join(service.path, 'current')
