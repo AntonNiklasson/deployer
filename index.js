@@ -8,11 +8,13 @@ const exec = require('child_process').execSync
 const bodyParser = require('body-parser')
 const services = require('./services')
 
+const logger = console
+
 const app = express()
 app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
-	res.send(Object.keys(services))
+	res.send(services)
 })
 
 app.get('/deploy/:service', (req, res) => {
@@ -23,33 +25,29 @@ app.get('/deploy/:service', (req, res) => {
 		const releasePath = (new Date()).getTime()
 
 		// Go to the service root folder.
-		console.log(`cd ${service.path}`)
+		logger.log(`cd ${service.path}`)
 		process.chdir(service.path)
 
 		// Clone the new release.
-		console.log(`git clone ${service.repo} ${releasePath}`)
+		logger.log(`git clone ${service.repo} ${releasePath}`)
 		exec(`git clone ${service.repo} ${releasePath}`)
 
 		// Step into the new release.
-		console.log(`cd ${path.join(service.path, releasePath.toString())}`)
+		logger.log(`cd ${path.join(service.path, releasePath.toString())}`)
 		process.chdir(path.join(service.path, releasePath.toString()))
 
 		// Execute each of the service's deploy commands.
 		service.commands.forEach(cmd => {
-			exec(cmd, (err) => {
-				console.log(`Running '${cmd}'`)
-				if(err) {
-					res.status(500).end()
-				}
-			})
+			logger.log(`Running '${cmd}'...`)
+			exec(cmd)
 		})
 
 		// Step out of the release folder.
-		console.log(`cd ..`)
+		logger.log(`cd ..`)
 		process.chdir('..')
 
 		// Activate the new release.
-		console.log(`ln -s ${releasePath} ${currentReleasePath}`)
+		logger.log(`ln -s ${releasePath} ${currentReleasePath}`)
 		exec(`ln -s ${releasePath} ${currentReleasePath}`)
 
 		res.end()
