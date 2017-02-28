@@ -64,7 +64,7 @@ const deploy = (req, res) => {
 		exec(`pm2 restart ${serviceName}`)
 	}
 
-	res.send(201)
+	res.sendStatus(201)
 }
 
 module.exports = deploy
