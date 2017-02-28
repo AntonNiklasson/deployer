@@ -4,7 +4,9 @@ const path = require('path')
 const logger = console
 
 const exec = (cmd) => {
-	logger.log(require('child_process').execSync(cmd).toString())
+	logger.log(cmd)
+	const output = require('child_process').execSync(cmd)
+	logger.log(output.toString())
 }
 
 const generateReleaseName = () => (new Date()).getTime().toString()
