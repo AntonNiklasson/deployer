@@ -23,8 +23,8 @@ const deploy = (req, res) => {
 	const service = services[serviceName]
 	const payload = req.body
 
-	if (payload.branch !== service.branch) {
-		res.status(200).send(`Not deploying ${payload.branch}`)
+	if (payload.ref.endsWith(service.branch)) {
+		res.status(200).send(`Not deploying ${payload.ref}`)
 	} else if (!payload.repository || !payload.repository.ssh_url || payload.repository.ssh_url !== service.repo) {
 		res.status(403).send('Trying to deploy the wrong service')
 	}
