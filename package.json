@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "DEBUG=express:* nodemon index.js"
+    "start": "DEBUG=express:* nodemon src/index.js"
   },
   "author": "Anton Niklasson",
   "dependencies": {
