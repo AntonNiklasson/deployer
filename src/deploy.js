@@ -35,6 +35,11 @@ const deploy = (serviceName) => {
 
 		// Symlink to the new release to activate it.
 		exec(`ln -sfn ${releasePath} ${currentReleaseLink}`)
+
+		// Restart the PM2 if it exists.
+		if (service.pm2) {
+			exec(`pm2 restart ${serviceName}`)
+		}
 	}
 }
 
