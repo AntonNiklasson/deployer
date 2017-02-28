@@ -29,7 +29,7 @@ const deploy = (service) => {
 		service.commands.forEach(exec)
 
 		// Symlink to the new release to activate it.
-		exec(`ln -s ${releasePath} ${currentReleaseLink}`)
+		exec(`ln -sfn ${releasePath} ${currentReleaseLink}`)
 	}
 }
 
