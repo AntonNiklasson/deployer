@@ -7,13 +7,12 @@ const exec = (cmd) => {
 	logger.log(require('child_process').execSync(cmd).toString())
 }
 
+const generateReleaseName = () => (new Date()).getTime().toString()
+
 const deploy = (service) => {
 	if(service && fs.existsSync(service.path)) {
-		const currentReleasePath = 'current'
-		const releasePath = path.join(
-			service.path,
-			(new Date()).getTime().toString()
-		)
+		const currentReleaseLink = path.join(service.path, 'current')
+		const releasePath = path.join(service.path, generateReleaseName())
 
 		// Go to the service root folder.
 		process.chdir(service.path)
@@ -28,7 +27,7 @@ const deploy = (service) => {
 		service.commands.forEach(exec)
 
 		// Symlink to the new release to activate it.
-		exec(`ln -s ${releasePath} ${currentReleasePath}`)
+		exec(`ln -s ${releasePath} ${currentReleaseLink}`)
 	}
 }
 
