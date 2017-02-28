@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const services = require('./services')
 
 const logger = console
 
@@ -9,9 +10,13 @@ const exec = (cmd) => {
 	logger.log(output.toString())
 }
 
-const generateReleaseName = () => (new Date()).getTime().toString()
+const generateReleaseName = () => {
+	return (new Date()).getTime().toString()
+}
 
-const deploy = (service) => {
+const deploy = (serviceName) => {
+	const service = services[serviceName]
+
 	if(service && fs.existsSync(service.path)) {
 		const currentReleaseLink = path.join(service.path, 'current')
 		const releasePath = path.join(service.path, generateReleaseName())

@@ -13,10 +13,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/deploy/:service', (req, res) => {
-	const service = services[req.params.service]
-
-	deploy(service)
-
+	deploy(req.params.service)
 	res.sendStatus(200)
 })
 
