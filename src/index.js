@@ -17,7 +17,7 @@ app.get('/deploy/:service', (req, res) => {
 
 	deploy(service)
 
-        res.sendStatus(200)
+	res.sendStatus(200)
 })
 
 app.listen(8888, 'localhost')
