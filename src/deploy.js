@@ -4,7 +4,6 @@ const mkdirp = require('mkdirp')
 const services = require('./services')
 
 const __DEV__ = process.env.NODE_ENV === 'dev'
-console.log(__DEV__)
 
 const logger = console
 
@@ -23,7 +22,9 @@ const deploy = (req, res) => {
 	const service = services[serviceName]
 	const payload = req.body
 
-	if (payload.ref.endsWith(service.branch)) {
+	if (!service) {
+		res.status(404).send(`Service Does Not Exist`)
+	} else if (payload.ref.endsWith(service.branch)) {
 		res.status(200).send(`Not deploying ${payload.ref}`)
 	} else if (!payload.repository || !payload.repository.ssh_url || payload.repository.ssh_url !== service.repo) {
 		res.status(403).send('Trying to deploy the wrong service')
@@ -32,10 +33,6 @@ const deploy = (req, res) => {
 	if (__DEV__) {
 		service.path = `~/Desktop${service.path}`
 		console.log(service)
-	}
-
-	if (!service) {
-		res.status(404).send(`Service Does Not Exist`)
 	}
 
 	if (!fs.existsSync(service.path)) {
