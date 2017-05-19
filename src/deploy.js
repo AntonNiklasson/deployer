@@ -1,17 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const mkdirp = require('mkdirp')
-const services = require('./services')
-
-const __DEV__ = process.env.NODE_ENV === 'dev'
-
-const logger = console
-
-const exec = (cmd) => {
-	logger.log(cmd)
-	const output = require('child_process').execSync(cmd)
-	logger.log(output.toString())
-}
+const services = require('../services')
+const exec = require('./utils/exec')
 
 const generateReleaseName = () => {
 	return (new Date()).getTime().toString()
@@ -22,21 +13,37 @@ const deploy = (req, res) => {
 	const service = services[serviceName]
 	const payload = req.body
 
+	// We need a payload to know what to deploy.
+	if (!payload) {
+		res.status(400).send('Empty payload')
+	}
+
+	// Does the service exist?
 	if (!service) {
 		res.status(404).send(`Service Does Not Exist`)
-	} else if (payload.ref.endsWith(service.branch)) {
-		res.status(200).send(`Not deploying ${payload.ref}`)
-	} else if (!payload.repository || !payload.repository.ssh_url || payload.repository.ssh_url !== service.repo) {
-		res.status(403).send('Trying to deploy the wrong service')
 	}
 
-	if (__DEV__) {
-		service.path = `~/Desktop${service.path}`
-		console.log(service)
+	// Was the deployment branch pushed?
+	else if (!payload.ref.endsWith(service.branch)) {
+		res.status(403).send(`Not deploying ${payload.ref}`)
 	}
 
+	// Make sure the service's repo is the one that was pushed.
+	else if (
+		!payload.repository
+		|| !payload.repository.ssh_url
+		|| payload.repository.ssh_url !== service.repo
+	) {
+		res.status(400).send('Trying to deploy the wrong service')
+	}
+
+	// Does the folder exist on disk? Create it otherwise.
 	if (!fs.existsSync(service.path)) {
-		mkdirp.sync(service.path)
+		try {
+			mkdirp.sync(service.path)
+		} catch (e) {
+			return res.status(500).send(`Failed to create folder ${service.path}`)
+		}
 	}
 
 	const currentReleaseLink = path.join(service.path, 'current')
@@ -55,11 +62,6 @@ const deploy = (req, res) => {
 
 	// Symlink to the new release to activate it.
 	exec(`ln -sfn ${releasePath} ${currentReleaseLink}`)
-
-	// Restart the PM2 if it exists.
-	if (service.pm2) {
-		exec(`pm2 restart ${serviceName}`)
-	}
 
 	res.sendStatus(201)
 }

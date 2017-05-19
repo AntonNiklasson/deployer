@@ -1,16 +1,14 @@
-#! /usr/bin/env nodejs
-
-const express = require('express')
+const app = require('express')()
 const bodyParser = require('body-parser')
-const services = require('./services')
+const services = require('../services')
 
-const app = express()
 app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
-	res.send(Object.keys(services))
+	return res.send(services.map(s => s.id))
 })
 
 app.post('/deploy/:service', require('./deploy'))
+app.use('*', (req, res) => { res.sendStatus(404) })
 
 module.exports = app.listen(8888, 'localhost')
