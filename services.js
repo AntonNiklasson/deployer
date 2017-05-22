@@ -6,7 +6,7 @@ module.exports = [
 		repo: "git@github.com:AntonNiklasson/deployer.git",
 		branch: "master",
 		commands: [
-			"npm install"
+			"yarn"
 		]
 	},
 	{
